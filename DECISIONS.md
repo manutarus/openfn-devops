@@ -47,7 +47,7 @@ If deploying to 20 ministries, managing 20 unique `.env` files manually becomes 
 **Minimum Useful Monitoring:**
 Since no telemetry can be shipped off-site, we must rely on local, on-box alerting that the ministry IT can easily monitor.
 1.  **Container Health Checks:** We utilize Docker's native `healthcheck` in `docker-compose.yml` (e.g., curling `/health_check`). This allows Docker to automatically restart the container if the application freezes, providing self-healing.
-2.  **Uptime Kuma (or similar lightweight local ping):** I would deploy a tiny, local instance of Uptime Kuma alongside OpenFn via the `docker-compose.yml`. 
+2.  **Uptime robots (a lightweight local ping):** We would deploy a tiny, local instance of Uptime robot alongside OpenFn via the `docker-compose.yml`. 
 
 **How we find out something is broken before they call:**
 In a strict air-gapped environment with no outbound metrics, **we mathematically cannot know it's broken before they call.** 

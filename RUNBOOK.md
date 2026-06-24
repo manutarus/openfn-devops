@@ -16,7 +16,7 @@ You will use the admin host to download the necessary Docker images and package 
 
 1. On the admin host, clone the deployment repository and navigate into it:
    ```bash
-   git clone git@github.com:manutarus/openfn-devops.git
+   git clone https://github.com/manutarus/openfn-devops.git
    cd openfn-devops
    ```
 
@@ -85,7 +85,7 @@ It takes a moment for the database to initialize and the web server to boot up.
 
 ## Troubleshooting
 
-**Scenario:** The `postgres` container fails to start, which causes the `web` and `worker` containers to crash endlessly. 
+**Failure Scenario:** The `postgres` container fails to start, which causes the `web` and `worker` containers to crash endlessly. 
 
 **Diagnosis:**
 1. Run `sudo docker compose ps`. If `postgres` says `Exit 1` or `restarting`, there is a problem.

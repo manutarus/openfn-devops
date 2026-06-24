@@ -54,7 +54,7 @@ if ! grep -q "DISABLE_DB_SSL=true" .env; then
   echo "DISABLE_DB_SSL=true" >> .env
 fi
 
-if ! grep -q "PORT=" .env; then
+if ! grep -q "^PORT=" .env; then
   echo "PORT=4000" >> .env
   echo "URL_PORT=4000" >> .env
 fi

@@ -24,19 +24,3 @@ The approach is split into two phases:
 - `DECISIONS.md`: A memo explaining the trade-offs regarding image handling, secret generation, updates, and observability.
 
 
-## How I Tested My Work
-
-To ensure this deployment strategy works perfectly under the strict constraints provided, I utilized **Vagrant** to simulate the ministry's environment locally:
-
-1. **Environment Simulation:** I created a `Vagrantfile` that spins up two virtual machines:
-   - A `jump-host` with internet access.
-   - An `air-gapped` server matching the hardware specs (Ubuntu 22.04 LTS, 8GB RAM, 4 vCPUs). I used `iptables` to strictly block all outbound internet traffic while allowing SSH from the jump host.
-2. **Bundle Generation:** I ran `bundle/build-bundle.sh` on my internet-connected machine to produce the `openfn-release.tar.gz` and `checksum.sha256`.
-3. **Deployment Test:** 
-   - I transferred the bundle to the `air-gapped` Vagrant VM using `scp`.
-   - I ssh'd into the `air-gapped` VM, verified the checksum, unpacked the tarball, and ran `./install.sh`.
-   - I verified the images loaded successfully and that `docker compose up -d` brought up `postgres`, `web`, and `worker`.
-   - I verified the local `/health_check` endpoint returned successfully.
-   - I simulated the failure scenario (Postgres permissions error) by deliberately mangling the volume and verifying the recovery steps in the runbook worked.
-
-

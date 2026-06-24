@@ -40,6 +40,11 @@ echo "--> Copying configuration files..."
 cp bundle/docker-compose.yml ${BUNDLE_DIR}/
 cp bundle/.env.example ${BUNDLE_DIR}/.env
 
+echo "--> Injecting version tags into .env file..."
+echo "LIGHTNING_VERSION=${LIGHTNING_VERSION}" >> ${BUNDLE_DIR}/.env
+echo "WORKER_VERSION=${WORKER_VERSION}" >> ${BUNDLE_DIR}/.env
+echo "POSTGRES_VERSION=${POSTGRES_VERSION}" >> ${BUNDLE_DIR}/.env
+
 echo "--> Creating installation script for the air-gapped server..."
 cp bundle/install.sh.template ${BUNDLE_DIR}/install.sh
 chmod +x ${BUNDLE_DIR}/install.sh

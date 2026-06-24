@@ -1,5 +1,5 @@
 x-lightning: &default-app
-  image: 'openfn/lightning:v2.16.7'
+  image: 'openfn/lightning:${LIGHTNING_VERSION:-v2.16.7}'
   depends_on:
     - 'postgres'
   restart: '${DOCKER_RESTART_POLICY:-unless-stopped}'
@@ -19,7 +19,7 @@ services:
       - POSTGRES_USER=${POSTGRES_USER:-postgres}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres}
       - POSTGRES_DB=${POSTGRES_DB:-lightning_prod}
-    image: 'postgres:15.12-alpine'
+    image: 'postgres:${POSTGRES_VERSION:-15.12-alpine}'
     restart: '${DOCKER_RESTART_POLICY:-unless-stopped}'
     stop_grace_period: '3s'
     volumes:
@@ -47,7 +47,7 @@ services:
       - .env
 
   worker:
-    image: 'openfn/ws-worker:latest'
+    image: 'openfn/ws-worker:${WORKER_VERSION:-v1.27.0}'
     deploy:
       resources:
         limits:

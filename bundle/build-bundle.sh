@@ -37,8 +37,8 @@ docker save -o ${BUNDLE_DIR}/images.tar \
 
 echo "--> Copying configuration files..."
 # docker-compose.yml will be created dynamically or copied from our source
-cp docker-compose.yml ${BUNDLE_DIR}/
-cp .env.example ${BUNDLE_DIR}/.env
+cp bundle/docker-compose.yml ${BUNDLE_DIR}/
+cp bundle/.env.example ${BUNDLE_DIR}/.env
 
 echo "--> Creating installation script for the air-gapped server..."
 cp bundle/install.sh.template ${BUNDLE_DIR}/install.sh

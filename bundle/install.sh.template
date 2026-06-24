@@ -1,0 +1,69 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+echo "=================================================="
+echo " OpenFn Lightning Installer (Air-gapped)"
+echo "=================================================="
+
+if ! command -v docker &> /dev/null; then
+    echo "ERROR: Docker is not installed. Please install Docker first."
+    exit 1
+fi
+
+echo "--> Loading Docker images from bundle..."
+docker load -i images.tar
+
+echo "--> Generating primary encryption keys and secrets if they are not set..."
+# In a real environment we might use the Elixir script, but to keep dependencies zero,
+# we use standard shell utilities to generate random 32-byte base64 strings
+if grep -q "PRIMARY_ENCRYPTION_KEY=your_encryption_key_here" .env; then
+  NEW_KEY=$(head -c 32 /dev/urandom | base64 -w 0)
+  sed -i "s|PRIMARY_ENCRYPTION_KEY=your_encryption_key_here|PRIMARY_ENCRYPTION_KEY=${NEW_KEY}|g" .env
+fi
+
+if grep -q "SECRET_KEY_BASE=your_secret_key_base_here" .env; then
+  NEW_SECRET=$(head -c 64 /dev/urandom | base64 -w 0)
+  sed -i "s|SECRET_KEY_BASE=your_secret_key_base_here|SECRET_KEY_BASE=${NEW_SECRET}|g" .env
+fi
+
+if grep -q "POSTGRES_PASSWORD=postgres" .env; then
+  NEW_DB_PASS=$(openssl rand -hex 16)
+  sed -i "s|POSTGRES_PASSWORD=postgres|POSTGRES_PASSWORD=${NEW_DB_PASS}|g" .env
+fi
+
+if grep -q "WORKER_SECRET=your_worker_secret_here" .env; then
+  NEW_WORKER_SECRET=$(head -c 32 /dev/urandom | base64 -w 0)
+  sed -i "s|WORKER_SECRET=your_worker_secret_here|WORKER_SECRET=${NEW_WORKER_SECRET}|g" .env
+fi
+
+if ! grep -q "WORKER_RUNS_PRIVATE_KEY=" .env; then
+  openssl genrsa -out private.pem 2048 2>/dev/null
+  openssl rsa -in private.pem -pubout -out public.pem 2>/dev/null
+  echo "WORKER_RUNS_PRIVATE_KEY=$(base64 -w 0 private.pem)" >> .env
+  echo "WORKER_LIGHTNING_PUBLIC_KEY=$(base64 -w 0 public.pem)" >> .env
+  rm private.pem public.pem
+fi
+
+if ! grep -q "DISABLE_DB_SSL=true" .env; then
+  echo "DISABLE_DB_SSL=true" >> .env
+fi
+
+if ! grep -q "PORT=" .env; then
+  echo "PORT=4000" >> .env
+  echo "URL_PORT=4000" >> .env
+fi
+
+if ! grep -q "LISTEN_ADDRESS=" .env; then
+  echo "LISTEN_ADDRESS=0.0.0.0" >> .env
+fi
+
+echo "--> Running Database Migrations..."
+docker compose up -d postgres
+sleep 5
+docker compose run --rm web /app/bin/migrate
+
+echo "--> Bringing up all services..."
+docker compose up -d
+
+echo "--> Done! Services are starting up."
+echo "Check status with: docker compose ps"

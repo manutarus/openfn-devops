@@ -1,0 +1,70 @@
+x-lightning: &default-app
+  image: 'openfn/lightning:v2.16.7'
+  depends_on:
+    - 'postgres'
+  restart: '${DOCKER_RESTART_POLICY:-unless-stopped}'
+  stop_grace_period: '3s'
+  tty: ${TTY:-false}
+  volumes:
+    - '${LIGHTNING_VOLUME:-lightning_data:/app/priv/static}'
+
+services:
+  postgres:
+    deploy:
+      resources:
+        limits:
+          cpus: '${DOCKER_POSTGRES_CPUS:-0}'
+          memory: '${DOCKER_POSTGRES_MEMORY:-0}'
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER:-postgres}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres}
+      - POSTGRES_DB=${POSTGRES_DB:-lightning_prod}
+    image: 'postgres:15.12-alpine'
+    restart: '${DOCKER_RESTART_POLICY:-unless-stopped}'
+    stop_grace_period: '3s'
+    volumes:
+      - 'postgres:/var/lib/postgresql/data'
+
+  web:
+    <<: *default-app
+    deploy:
+      resources:
+        limits:
+          cpus: '${DOCKER_WEB_CPUS:-0}'
+          memory: '${DOCKER_WEB_MEMORY:-0}'
+    environment:
+      # We use .env file to pass the rest of the secrets
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-lightning_prod}
+    healthcheck:
+      test: '${DOCKER_WEB_HEALTHCHECK_TEST:-curl -f http://localhost:4000/health_check || exit 1}'
+      interval: '10s'
+      timeout: '3s'
+      start_period: '5s'
+      retries: 3
+    ports:
+      - '${LIGHTNING_EXTERNAL_PORT:-80}:${URL_PORT:-4000}'
+    env_file:
+      - .env
+
+  worker:
+    image: 'openfn/ws-worker:latest'
+    deploy:
+      resources:
+        limits:
+          cpus: '${DOCKER_WORKER_CPUS:-0}'
+          memory: '${DOCKER_WEB_MEMORY:-0}'
+    depends_on:
+      web:
+        condition: service_healthy
+        restart: true
+    command: ['pnpm', 'start:prod', '-l', 'ws://web:${URL_PORT:-4000}/worker']
+    restart: '${DOCKER_RESTART_POLICY:-unless-stopped}'
+    stop_grace_period: '3s'
+    expose:
+      - '2222'
+    env_file:
+      - .env
+
+volumes:
+  postgres: {}
+  lightning_data: {}

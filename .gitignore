@@ -1,0 +1,13 @@
+# Ignore Vagrant and VM logs
+Vagrantfile
+.vagrant/
+*.log
+
+# Ignore generated bundles and tarballs
+openfn-release/
+openfn-release.tar.gz
+checksum.sha256
+images.tar
+
+# Ignore environment variables if generated
+.env

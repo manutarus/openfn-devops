@@ -50,8 +50,7 @@ sha256sum -c checksum.sha256
 ### Step 2: Unpack the Bundle
 Extract the contents of the archive and navigate into the directory:
 ```bash
-tar -xzvf openfn-release.tar.gz
-cd openfn-release
+tar -xzvf openfn-release.tar.gz && cd openfn-release
 ```
 
 ### Step 3: Run the Installer

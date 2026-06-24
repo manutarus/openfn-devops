@@ -5,6 +5,13 @@ echo "=================================================="
 echo " OpenFn Lightning Bundle Generator"
 echo "=================================================="
 
+if ! command -v docker &> /dev/null; then
+    echo "ERROR: Docker is not installed on this machine."
+    echo "The bundle generator requires Docker to pull and export the OpenFn images."
+    echo "Please install Docker and try again."
+    exit 1
+fi
+
 # Versions
 LIGHTNING_VERSION="v2.16.7"
 WORKER_VERSION="v1.27.0"

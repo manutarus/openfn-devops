@@ -16,8 +16,7 @@ You will use the admin host to download the necessary Docker images and package 
 
 1. On the admin host, clone the deployment repository and navigate into it:
    ```bash
-   git clone https://github.com/manutarus/openfn-devops.git
-   cd openfn-devops
+   git clone https://github.com/manutarus/openfn-devops.git && cd openfn-devops
    ```
 
 2. Run the build script:
